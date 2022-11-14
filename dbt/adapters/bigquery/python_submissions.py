@@ -7,8 +7,6 @@ from google.api_core import retry
 from google.api_core.client_options import ClientOptions
 from google.cloud import storage, dataproc_v1  # type: ignore
 
-from google.protobuf.json_format import ParseDict, Parse
-
 OPERATION_RETRY_TIME = 10
 
 
@@ -175,4 +173,26 @@ class ServerlessDataProcHelper(BaseDataProcHelper):
 
     @classmethod
     def _configure_batch_from_config(cls, configDict, target):
-        ParseDict(configDict, target._pb)
+        for key, value in configDict.items():
+            if hasattr(target, key):
+                attr = getattr(target, key)
+
+                # Basic types we just set as-is.
+                if type(value) in [str, int, float]:
+                    setattr(target, key, type(attr)(value))
+
+                # For lists, we assume target to be a a protobuf repeated field.
+                # The types must match.
+                elif isinstance(value, list):
+                    for v in value:
+                        attr.append(v)
+
+                elif isinstance(value, dict):
+                    # The target is a protobuf map. Cast to expected type and set.
+                    if "ScalarMapContainer" in type(attr).__name__:
+                        for k, v in value.items():
+                            attr[k] = type(attr[k])(v)
+
+                    # Target is another configuration object. Recurse.
+                    else:
+                        cls._configure_batch_from_config(value, attr)

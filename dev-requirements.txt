@@ -22,7 +22,6 @@ tox>=3.13
 types-requests
 twine
 wheel
-protobuf
 
 # For dataproc running
 google-cloud-storage[dataproc]>=2.4.0
