@@ -26,5 +26,5 @@ protobuf
 
 # For dataproc running
 google-cloud-storage>=2.14.0
-google-cloud-storage[dataproc]>=2.14.0
+google-cloud-storage[dataproc]>=2.4.0
 google-cloud-dataproc[dataproc]>=4.0.3
